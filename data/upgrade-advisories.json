@@ -1,0 +1,123 @@
+{
+  "node": [
+    {
+      "fromBelow": 20,
+      "targetAtLeast": 20,
+      "severity": "high",
+      "title": "Node.js versions below 20 are outside the current frontend baseline",
+      "summary": "Move to an active or maintenance LTS line before attempting framework upgrades.",
+      "notes": [
+        "Production applications should use Active LTS or Maintenance LTS release lines.",
+        "Validate local build scripts, CI images, and native addons when moving Node majors."
+      ],
+      "references": [
+        {
+          "label": "Node.js Releases",
+          "url": "https://nodejs.org/en/about/releases/"
+        }
+      ]
+    }
+  ],
+  "react": [
+    {
+      "fromBelow": 19,
+      "targetAtLeast": 19,
+      "severity": "high",
+      "title": "React 19 requires the modern JSX transform",
+      "summary": "Projects upgrading to React 19 should validate JSX transform settings and related tooling.",
+      "notes": [
+        "Upgrade react and react-dom together.",
+        "If using TypeScript, upgrade @types/react and @types/react-dom with the React major.",
+        "Run codemods for React 19 migration where possible."
+      ],
+      "affectedPatterns": [
+        "Legacy render APIs",
+        "String refs",
+        "Older form action hooks",
+        "Libraries that depend on React internals"
+      ],
+      "references": [
+        {
+          "label": "React 19 Upgrade Guide",
+          "url": "https://react.dev/blog/2024/04/25/react-19-upgrade-guide"
+        }
+      ]
+    }
+  ],
+  "react-dom": [
+    {
+      "fromBelow": 19,
+      "targetAtLeast": 19,
+      "severity": "medium",
+      "title": "React DOM upgrade should be reviewed alongside app bootstrap APIs",
+      "summary": "Check client bootstrap points and hydration entry files when moving to React 19.",
+      "notes": [
+        "Search for legacy render and hydrate entrypoints before upgrading.",
+        "Confirm SSR and hydration code paths behave correctly after the upgrade."
+      ],
+      "affectedPatterns": [
+        "render",
+        "hydrate",
+        "hydrateRoot",
+        "createRoot"
+      ],
+      "references": [
+        {
+          "label": "React 19 Upgrade Guide",
+          "url": "https://react.dev/blog/2024/04/25/react-19-upgrade-guide"
+        }
+      ]
+    }
+  ],
+  "next": [
+    {
+      "fromBelow": 15,
+      "targetAtLeast": 15,
+      "severity": "high",
+      "title": "Next.js 15 introduces async request APIs",
+      "summary": "Previously synchronous request-bound APIs become asynchronous and may require code changes.",
+      "notes": [
+        "Review uses of cookies, headers, and draftMode in server code.",
+        "Review page, layout, route, and metadata functions that access params or searchParams.",
+        "React 19 becomes the minimum supported React version."
+      ],
+      "affectedPatterns": [
+        "cookies(",
+        "headers(",
+        "draftMode(",
+        "params",
+        "searchParams",
+        "useFormState"
+      ],
+      "references": [
+        {
+          "label": "Next.js 15 Upgrade Guide",
+          "url": "https://nextjs.org/docs/app/guides/upgrading/version-15"
+        }
+      ]
+    }
+  ],
+  "vite": [
+    {
+      "fromBelow": 7,
+      "targetAtLeast": 7,
+      "severity": "medium",
+      "title": "Vite 7 drops Node.js 18 support",
+      "summary": "Upgrade Node.js before or alongside Vite when targeting Vite 7.",
+      "notes": [
+        "Vite 7 requires Node.js 20.19+ or 22.12+.",
+        "Review browser target defaults if your support matrix includes older browsers."
+      ],
+      "affectedPatterns": [
+        "engines.node",
+        "build.target"
+      ],
+      "references": [
+        {
+          "label": "Vite migration guide",
+          "url": "https://vite.dev/guide/migration"
+        }
+      ]
+    }
+  ]
+}

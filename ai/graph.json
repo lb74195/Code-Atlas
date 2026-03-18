@@ -1,0 +1,453 @@
+{
+  "nodes": [
+    {
+      "id": "project:frontend-context-graph",
+      "kind": "project",
+      "label": "frontend-context-graph",
+      "path": "/Users/lb/Zack_Code_Base/openai_code"
+    },
+    {
+      "id": "runtime:node",
+      "kind": "runtime",
+      "label": "node >=20.0.0"
+    },
+    {
+      "id": "directory:src",
+      "kind": "directory",
+      "path": "src"
+    },
+    {
+      "id": "file:src/cli.js",
+      "kind": "file",
+      "label": "src/cli.js",
+      "path": "src/cli.js"
+    },
+    {
+      "id": "file:src/config.js",
+      "kind": "file",
+      "label": "src/config.js",
+      "path": "src/config.js"
+    },
+    {
+      "id": "symbol:src/config.js:loadConfig",
+      "kind": "symbol",
+      "label": "loadConfig",
+      "symbolKind": "function",
+      "path": "src/config.js",
+      "confidence": "heuristic"
+    },
+    {
+      "id": "symbol:src/config.js:validateConfig",
+      "kind": "symbol",
+      "label": "validateConfig",
+      "symbolKind": "function",
+      "path": "src/config.js",
+      "confidence": "heuristic"
+    },
+    {
+      "id": "file:src/dependency-analysis.js",
+      "kind": "file",
+      "label": "src/dependency-analysis.js",
+      "path": "src/dependency-analysis.js"
+    },
+    {
+      "id": "symbol:src/dependency-analysis.js:analyzeDependencies",
+      "kind": "symbol",
+      "label": "analyzeDependencies",
+      "symbolKind": "function",
+      "path": "src/dependency-analysis.js",
+      "confidence": "heuristic"
+    },
+    {
+      "id": "file:src/docs.js",
+      "kind": "file",
+      "label": "src/docs.js",
+      "path": "src/docs.js"
+    },
+    {
+      "id": "symbol:src/docs.js:writeArtifacts",
+      "kind": "symbol",
+      "label": "writeArtifacts",
+      "symbolKind": "function",
+      "path": "src/docs.js",
+      "confidence": "heuristic"
+    },
+    {
+      "id": "file:src/files.js",
+      "kind": "file",
+      "label": "src/files.js",
+      "path": "src/files.js"
+    },
+    {
+      "id": "symbol:src/files.js:listSourceFiles",
+      "kind": "symbol",
+      "label": "listSourceFiles",
+      "symbolKind": "function",
+      "path": "src/files.js",
+      "confidence": "heuristic"
+    },
+    {
+      "id": "file:src/graph.js",
+      "kind": "file",
+      "label": "src/graph.js",
+      "path": "src/graph.js"
+    },
+    {
+      "id": "symbol:src/graph.js:buildGraph",
+      "kind": "symbol",
+      "label": "buildGraph",
+      "symbolKind": "function",
+      "path": "src/graph.js",
+      "confidence": "heuristic"
+    },
+    {
+      "id": "file:src/semver.js",
+      "kind": "file",
+      "label": "src/semver.js",
+      "path": "src/semver.js"
+    },
+    {
+      "id": "symbol:src/semver.js:extractMajor",
+      "kind": "symbol",
+      "label": "extractMajor",
+      "symbolKind": "function",
+      "path": "src/semver.js",
+      "confidence": "heuristic"
+    },
+    {
+      "id": "file:src/source-analysis.js",
+      "kind": "file",
+      "label": "src/source-analysis.js",
+      "path": "src/source-analysis.js"
+    },
+    {
+      "id": "symbol:src/source-analysis.js:analyzeSources",
+      "kind": "symbol",
+      "label": "analyzeSources",
+      "symbolKind": "function",
+      "path": "src/source-analysis.js",
+      "confidence": "heuristic"
+    }
+  ],
+  "edges": [
+    {
+      "from": "project:frontend-context-graph",
+      "to": "runtime:node",
+      "kind": "DEPENDS_ON"
+    },
+    {
+      "from": "project:frontend-context-graph",
+      "to": "directory:src",
+      "kind": "CONTAINS"
+    },
+    {
+      "from": "directory:src",
+      "to": "file:src/cli.js",
+      "kind": "CONTAINS"
+    },
+    {
+      "from": "directory:src",
+      "to": "file:src/config.js",
+      "kind": "CONTAINS"
+    },
+    {
+      "from": "file:src/config.js",
+      "to": "symbol:src/config.js:loadConfig",
+      "kind": "DECLARES"
+    },
+    {
+      "from": "file:src/config.js",
+      "to": "symbol:src/config.js:validateConfig",
+      "kind": "DECLARES"
+    },
+    {
+      "from": "directory:src",
+      "to": "file:src/dependency-analysis.js",
+      "kind": "CONTAINS"
+    },
+    {
+      "from": "file:src/dependency-analysis.js",
+      "to": "symbol:src/dependency-analysis.js:analyzeDependencies",
+      "kind": "DECLARES"
+    },
+    {
+      "from": "directory:src",
+      "to": "file:src/docs.js",
+      "kind": "CONTAINS"
+    },
+    {
+      "from": "file:src/docs.js",
+      "to": "symbol:src/docs.js:writeArtifacts",
+      "kind": "DECLARES"
+    },
+    {
+      "from": "directory:src",
+      "to": "file:src/files.js",
+      "kind": "CONTAINS"
+    },
+    {
+      "from": "file:src/files.js",
+      "to": "symbol:src/files.js:listSourceFiles",
+      "kind": "DECLARES"
+    },
+    {
+      "from": "directory:src",
+      "to": "file:src/graph.js",
+      "kind": "CONTAINS"
+    },
+    {
+      "from": "file:src/graph.js",
+      "to": "symbol:src/graph.js:buildGraph",
+      "kind": "DECLARES"
+    },
+    {
+      "from": "directory:src",
+      "to": "file:src/semver.js",
+      "kind": "CONTAINS"
+    },
+    {
+      "from": "file:src/semver.js",
+      "to": "symbol:src/semver.js:extractMajor",
+      "kind": "DECLARES"
+    },
+    {
+      "from": "directory:src",
+      "to": "file:src/source-analysis.js",
+      "kind": "CONTAINS"
+    },
+    {
+      "from": "file:src/source-analysis.js",
+      "to": "symbol:src/source-analysis.js:analyzeSources",
+      "kind": "DECLARES"
+    },
+    {
+      "from": "file:src/cli.js",
+      "to": "module:node:fs",
+      "kind": "IMPORTS",
+      "specifier": "node:fs",
+      "imported": "fs"
+    },
+    {
+      "from": "file:src/cli.js",
+      "to": "module:node:path",
+      "kind": "IMPORTS",
+      "specifier": "node:path",
+      "imported": "path"
+    },
+    {
+      "from": "file:src/cli.js",
+      "to": "module:./config.js",
+      "kind": "IMPORTS",
+      "specifier": "./config.js",
+      "imported": "{ loadConfig, validateConfig }"
+    },
+    {
+      "from": "file:src/cli.js",
+      "to": "module:./dependency-analysis.js",
+      "kind": "IMPORTS",
+      "specifier": "./dependency-analysis.js",
+      "imported": "{ analyzeDependencies }"
+    },
+    {
+      "from": "file:src/cli.js",
+      "to": "module:./docs.js",
+      "kind": "IMPORTS",
+      "specifier": "./docs.js",
+      "imported": "{ writeArtifacts }"
+    },
+    {
+      "from": "file:src/cli.js",
+      "to": "module:./files.js",
+      "kind": "IMPORTS",
+      "specifier": "./files.js",
+      "imported": "{ listSourceFiles }"
+    },
+    {
+      "from": "file:src/cli.js",
+      "to": "module:./graph.js",
+      "kind": "IMPORTS",
+      "specifier": "./graph.js",
+      "imported": "{ buildGraph }"
+    },
+    {
+      "from": "file:src/cli.js",
+      "to": "module:./source-analysis.js",
+      "kind": "IMPORTS",
+      "specifier": "./source-analysis.js",
+      "imported": "{ analyzeSources }"
+    },
+    {
+      "from": "file:src/config.js",
+      "to": "module:node:fs",
+      "kind": "IMPORTS",
+      "specifier": "node:fs",
+      "imported": "fs"
+    },
+    {
+      "from": "file:src/config.js",
+      "to": "module:node:path",
+      "kind": "IMPORTS",
+      "specifier": "node:path",
+      "imported": "path"
+    },
+    {
+      "from": "file:src/dependency-analysis.js",
+      "to": "module:node:fs",
+      "kind": "IMPORTS",
+      "specifier": "node:fs",
+      "imported": "fs"
+    },
+    {
+      "from": "file:src/dependency-analysis.js",
+      "to": "module:node:path",
+      "kind": "IMPORTS",
+      "specifier": "node:path",
+      "imported": "path"
+    },
+    {
+      "from": "file:src/dependency-analysis.js",
+      "to": "module:./semver.js",
+      "kind": "IMPORTS",
+      "specifier": "./semver.js",
+      "imported": "{ extractMajor }"
+    },
+    {
+      "from": "file:src/docs.js",
+      "to": "module:node:fs",
+      "kind": "IMPORTS",
+      "specifier": "node:fs",
+      "imported": "fs"
+    },
+    {
+      "from": "file:src/docs.js",
+      "to": "module:node:path",
+      "kind": "IMPORTS",
+      "specifier": "node:path",
+      "imported": "path"
+    },
+    {
+      "from": "file:src/files.js",
+      "to": "module:node:fs",
+      "kind": "IMPORTS",
+      "specifier": "node:fs",
+      "imported": "fs"
+    },
+    {
+      "from": "file:src/files.js",
+      "to": "module:node:path",
+      "kind": "IMPORTS",
+      "specifier": "node:path",
+      "imported": "path"
+    },
+    {
+      "from": "file:src/source-analysis.js",
+      "to": "module:node:fs",
+      "kind": "IMPORTS",
+      "specifier": "node:fs",
+      "imported": "fs"
+    },
+    {
+      "from": "file:src/source-analysis.js",
+      "to": "module:node:path",
+      "kind": "IMPORTS",
+      "specifier": "node:path",
+      "imported": "path"
+    },
+    {
+      "from": "file:src/cli.js",
+      "to": "symbol:external:loadConfig",
+      "kind": "CALLS",
+      "callee": "loadConfig"
+    },
+    {
+      "from": "file:src/cli.js",
+      "to": "symbol:external:validateConfig",
+      "kind": "CALLS",
+      "callee": "validateConfig"
+    },
+    {
+      "from": "file:src/cli.js",
+      "to": "symbol:external:listSourceFiles",
+      "kind": "CALLS",
+      "callee": "listSourceFiles"
+    },
+    {
+      "from": "file:src/cli.js",
+      "to": "symbol:external:analyzeDependencies",
+      "kind": "CALLS",
+      "callee": "analyzeDependencies"
+    },
+    {
+      "from": "file:src/cli.js",
+      "to": "symbol:external:analyzeSources",
+      "kind": "CALLS",
+      "callee": "analyzeSources"
+    },
+    {
+      "from": "file:src/cli.js",
+      "to": "symbol:external:buildGraph",
+      "kind": "CALLS",
+      "callee": "buildGraph"
+    },
+    {
+      "from": "file:src/cli.js",
+      "to": "symbol:external:writeArtifacts",
+      "kind": "CALLS",
+      "callee": "writeArtifacts"
+    },
+    {
+      "from": "file:src/config.js",
+      "to": "symbol:src/config.js:loadConfig",
+      "kind": "CALLS",
+      "callee": "loadConfig"
+    },
+    {
+      "from": "file:src/config.js",
+      "to": "symbol:src/config.js:validateConfig",
+      "kind": "CALLS",
+      "callee": "validateConfig"
+    },
+    {
+      "from": "file:src/dependency-analysis.js",
+      "to": "symbol:src/dependency-analysis.js:analyzeDependencies",
+      "kind": "CALLS",
+      "callee": "analyzeDependencies"
+    },
+    {
+      "from": "file:src/dependency-analysis.js",
+      "to": "symbol:external:extractMajor",
+      "kind": "CALLS",
+      "callee": "extractMajor"
+    },
+    {
+      "from": "file:src/docs.js",
+      "to": "symbol:src/docs.js:writeArtifacts",
+      "kind": "CALLS",
+      "callee": "writeArtifacts"
+    },
+    {
+      "from": "file:src/files.js",
+      "to": "symbol:src/files.js:listSourceFiles",
+      "kind": "CALLS",
+      "callee": "listSourceFiles"
+    },
+    {
+      "from": "file:src/graph.js",
+      "to": "symbol:src/graph.js:buildGraph",
+      "kind": "CALLS",
+      "callee": "buildGraph"
+    },
+    {
+      "from": "file:src/semver.js",
+      "to": "symbol:src/semver.js:extractMajor",
+      "kind": "CALLS",
+      "callee": "extractMajor"
+    },
+    {
+      "from": "file:src/source-analysis.js",
+      "to": "symbol:src/source-analysis.js:analyzeSources",
+      "kind": "CALLS",
+      "callee": "analyzeSources"
+    }
+  ]
+}

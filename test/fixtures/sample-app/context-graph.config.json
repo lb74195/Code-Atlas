@@ -1,0 +1,18 @@
+{
+  "projectName": "sample-app",
+  "targets": {
+    "node": "22",
+    "react": "19",
+    "react-dom": "19",
+    "next": "15",
+    "vite": "7"
+  },
+  "include": [
+    "app",
+    "components"
+  ],
+  "exclude": [
+    "node_modules",
+    ".next"
+  ]
+}

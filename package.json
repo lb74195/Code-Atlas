@@ -1,0 +1,21 @@
+{
+  "name": "frontend-context-graph",
+  "version": "0.1.0",
+  "description": "POC for frontend code graph analysis, dependency upgrade intelligence, and AI-facing progressive disclosure docs.",
+  "type": "module",
+  "packageManager": "npm@10.9.2",
+  "bin": {
+    "fcg": "./src/cli.js"
+  },
+  "scripts": {
+    "analyze": "node ./src/cli.js analyze .",
+    "new-task": "node ./scripts/init-task.js",
+    "smoke": "node ./src/cli.js analyze ./test/fixtures/sample-app --output ai-output",
+    "test": "node --test",
+    "lint": "node ./src/cli.js validate-config"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "license": "MIT"
+}
