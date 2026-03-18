@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 export function writeArtifacts(rootDir, outputDirName, config, dependencyReport, sourceReport, graph) {
-  const outputDir = path.join(rootDir, outputDirName);
+  const outputDir = path.isAbsolute(outputDirName) ? outputDirName : path.join(rootDir, outputDirName);
   fs.mkdirSync(outputDir, { recursive: true });
   fs.mkdirSync(path.join(outputDir, "modules"), { recursive: true });
   fs.mkdirSync(path.join(outputDir, "playbooks"), { recursive: true });
@@ -233,7 +233,7 @@ function groupFilesByModule(files) {
   const modules = new Map();
 
   for (const file of files) {
-    const moduleName = file.path.includes("/") ? file.path.split("/")[0] : "root";
+    const moduleName = inferModuleName(file.path);
     const existing = modules.get(moduleName) ?? { module: moduleName, files: [] };
     existing.files.push(file);
     modules.set(moduleName, existing);
@@ -261,4 +261,18 @@ function formatOccurrenceLocation(occurrence) {
   }
 
   return `${base} in \`${occurrence.symbolName}\` (${occurrence.symbolKind})`;
+}
+
+function inferModuleName(filePath) {
+  const parts = filePath.split("/");
+
+  if (parts.length === 1) {
+    return "root";
+  }
+
+  if (["apps", "packages", "internal", "tools"].includes(parts[0]) && parts.length >= 2) {
+    return `${parts[0]}/${parts[1]}`;
+  }
+
+  return parts[0];
 }

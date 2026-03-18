@@ -12,7 +12,10 @@ export function loadConfig(cwd, configPath) {
   if (!configPath) {
     const candidate = path.join(cwd, "context-graph.config.json");
     if (!fs.existsSync(candidate)) {
-      return DEFAULT_CONFIG;
+      return {
+        ...DEFAULT_CONFIG,
+        hasCustomInclude: false
+      };
     }
     configPath = candidate;
   }
@@ -24,7 +27,8 @@ export function loadConfig(cwd, configPath) {
     ...parsed,
     include: parsed.include ?? DEFAULT_CONFIG.include,
     exclude: parsed.exclude ?? DEFAULT_CONFIG.exclude,
-    targets: parsed.targets ?? DEFAULT_CONFIG.targets
+    targets: parsed.targets ?? DEFAULT_CONFIG.targets,
+    hasCustomInclude: parsed.include != null
   };
 }
 

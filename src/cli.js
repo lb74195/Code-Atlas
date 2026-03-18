@@ -42,7 +42,7 @@ function runAnalyze(args) {
   );
   const files = listSourceFiles(rootDir, config);
   const dependencyReport = analyzeDependencies(rootDir, config, rules);
-  const sourceReport = analyzeSources(rootDir, files);
+  const sourceReport = analyzeSources(rootDir, files, config);
   dependencyReport.advisories = attachAdvisoryOccurrences(rootDir, files, dependencyReport.advisories, sourceReport);
   const graph = buildGraph(rootDir, config, dependencyReport, sourceReport);
   const outputPath = writeArtifacts(rootDir, outputDir, config, dependencyReport, sourceReport, graph);

@@ -12,9 +12,10 @@ This repository is the bootstrap POC for a larger product direction:
 
 1. Read project configuration and package metadata.
 2. Scan relevant frontend source files.
-3. Extract graph primitives with low-cost heuristics.
-4. Attach dependency and upgrade advisory nodes.
-5. Emit JSON graph plus layered Markdown documents.
+3. Discover workspace packages and path alias rules when present.
+4. Extract graph primitives with low-cost heuristics.
+5. Attach dependency and upgrade advisory nodes.
+6. Emit JSON graph plus layered Markdown documents.
 
 ## Graph Model
 

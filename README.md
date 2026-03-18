@@ -23,7 +23,9 @@ The long-term goal is an open core:
 The first version focuses on React and Next.js shaped repositories without external parsers:
 
 - scans frontend source files
+- auto-discovers frontend monorepo roots such as `apps/` and `packages/`
 - extracts files, symbols, imports, calls, JSX component usage, and route hints
+- resolves relative imports, workspace package imports, and `tsconfig` path aliases when possible
 - maps package and runtime dependencies
 - evaluates upgrade advisories against configured target versions
 - highlights files and inferred symbols that appear to use affected APIs or patterns during upgrades

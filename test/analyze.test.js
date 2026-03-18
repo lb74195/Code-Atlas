@@ -13,6 +13,7 @@ import { analyzeSources } from "../src/source-analysis.js";
 import { attachAdvisoryOccurrences } from "../src/upgrade-impact.js";
 
 const fixtureDir = path.resolve("test/fixtures/sample-app");
+const workspaceFixtureDir = path.resolve("test/fixtures/sample-workspace");
 const rules = JSON.parse(fs.readFileSync(path.resolve("data/upgrade-advisories.json"), "utf8"));
 
 test("analyzes a sample frontend app and emits docs", () => {
@@ -46,4 +47,55 @@ test("analyzes a sample frontend app and emits docs", () => {
     fs.readFileSync(path.join(outputDir, "playbooks", "upgrades", "next.md"), "utf8"),
     /HomePage/
   );
+});
+
+test("discovers workspace source roots and resolves workspace package imports", () => {
+  const config = loadConfig(workspaceFixtureDir, null);
+  const files = listSourceFiles(workspaceFixtureDir, config);
+  const sourceReport = analyzeSources(workspaceFixtureDir, files, config);
+  const outputDir = fs.mkdtempSync(path.join(os.tmpdir(), "fcg-workspace-test-"));
+  const graph = buildGraph(workspaceFixtureDir, config, {
+    packageJsonPath: path.join(workspaceFixtureDir, "package.json"),
+    packageManager: "pnpm@10.5.0",
+    runtime: { requested: ">=20", currentMajor: 20, targetMajor: null },
+    dependencies: [],
+    advisories: []
+  }, sourceReport);
+
+  writeArtifacts(workspaceFixtureDir, path.relative(workspaceFixtureDir, outputDir), config, {
+    packageJsonPath: path.join(workspaceFixtureDir, "package.json"),
+    packageManager: "pnpm@10.5.0",
+    runtime: { requested: ">=20", currentMajor: 20, targetMajor: null },
+    dependencies: [],
+    advisories: []
+  }, sourceReport, graph);
+
+  assert.equal(files.length, 4);
+  assert.ok(sourceReport.files.some((file) => file.path === "apps/web/src/main.tsx"));
+  assert.ok(sourceReport.files.some((file) => file.path === "packages/ui/Button.tsx"));
+  assert.ok(sourceReport.files.some((file) => file.path === "packages/utils/index.ts"));
+  assert.ok(sourceReport.files.some((file) => file.path === "apps/web/src/helpers/label.ts"));
+  assert.ok(
+    sourceReport.importEdges.some(
+      (edge) => edge.from === "file:apps/web/src/main.tsx" && edge.to === "file:packages/ui/Button.tsx"
+    )
+  );
+  assert.ok(
+    sourceReport.callEdges.some(
+      (edge) => edge.from === "file:apps/web/src/main.tsx" && edge.to === "symbol:packages/utils/index.ts:formatLabel"
+    )
+  );
+  assert.ok(
+    sourceReport.callEdges.some(
+      (edge) => edge.from === "file:apps/web/src/main.tsx" && edge.to === "symbol:apps/web/src/helpers/label.ts:formatAlias"
+    )
+  );
+  assert.ok(
+    sourceReport.componentEdges.some(
+      (edge) => edge.from === "file:apps/web/src/main.tsx" && edge.to === "symbol:packages/ui/Button.tsx:Button"
+    )
+  );
+  assert.ok(fs.existsSync(path.join(outputDir, "modules", "apps-web.md")));
+  assert.ok(fs.existsSync(path.join(outputDir, "modules", "packages-ui.md")));
+  assert.match(fs.readFileSync(path.join(outputDir, "llms.txt"), "utf8"), /modules\/apps-web\.md/);
 });

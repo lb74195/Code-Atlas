@@ -1,14 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const CODE_EXTENSIONS = new Set([".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs"]);
+import { discoverSearchRoots } from "./project-context.js";
+
+const CODE_EXTENSIONS = new Set([".js", ".jsx", ".ts", ".tsx", ".mjs", ".cjs", ".vue"]);
 
 export function listSourceFiles(rootDir, config) {
-  const includeRoots = config.include
-    .map((entry) => path.join(rootDir, entry))
-    .filter((entry) => fs.existsSync(entry));
-
-  const searchRoots = includeRoots.length > 0 ? includeRoots : [rootDir];
+  const searchRoots = discoverSearchRoots(rootDir, config);
   const files = [];
 
   for (const searchRoot of searchRoots) {
@@ -49,6 +47,6 @@ function shouldExclude(relativePath, exclude) {
   }
 
   return exclude.some((segment) => {
-    return relativePath === segment || relativePath.startsWith(`${segment}${path.sep}`);
+    return relativePath === segment || relativePath.startsWith(`${segment}${path.sep}`) || relativePath.startsWith(`${segment}/`);
   });
 }
