@@ -16,6 +16,7 @@ This repository is the bootstrap POC for a larger product direction:
 4. Extract graph primitives with low-cost heuristics.
 5. Attach dependency and upgrade advisory nodes.
 6. Emit JSON graph plus layered Markdown documents.
+7. Score progressive disclosure coverage for generated AI docs.
 
 ## Graph Model
 
@@ -50,3 +51,15 @@ Core edge kinds:
 - Keep extraction dependency-free for the first iteration.
 - Prefer explicit heuristics and confidence labels over overstated precision.
 - Put package upgrade knowledge in data files so paid reasoning can build on top.
+
+## Generated Artifacts
+
+- `graph.json`
+- `llms.txt`
+- `overview.md`
+- `dependencies.md`
+- `evaluation.md`
+- `evaluation.json`
+- `modules/*.md`
+- `playbooks/refactor.md`
+- `playbooks/upgrades/*.md`

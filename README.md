@@ -30,6 +30,7 @@ The first version focuses on React and Next.js shaped repositories without exter
 - maps package and runtime dependencies
 - evaluates upgrade advisories against configured target versions
 - highlights files and inferred symbols that appear to use affected APIs or patterns during upgrades
+- emits `evaluation.md` and `evaluation.json` to score progressive disclosure coverage for AI consumers
 - writes progressive disclosure docs into `ai/`
 
 ## Usage

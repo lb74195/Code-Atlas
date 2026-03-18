@@ -42,10 +42,20 @@ test("analyzes a sample frontend app and emits docs", () => {
   assert.ok(fs.existsSync(path.join(outputDir, "llms.txt")));
   assert.ok(fs.existsSync(path.join(outputDir, "overview.md")));
   assert.ok(fs.existsSync(path.join(outputDir, "dependencies.md")));
+  assert.ok(fs.existsSync(path.join(outputDir, "evaluation.md")));
+  assert.ok(fs.existsSync(path.join(outputDir, "evaluation.json")));
   assert.ok(fs.existsSync(path.join(outputDir, "playbooks", "upgrades", "next.md")));
   assert.match(
     fs.readFileSync(path.join(outputDir, "playbooks", "upgrades", "next.md"), "utf8"),
     /HomePage/
+  );
+  assert.equal(
+    JSON.parse(fs.readFileSync(path.join(outputDir, "evaluation.json"), "utf8")).grade,
+    "A"
+  );
+  assert.equal(
+    JSON.parse(fs.readFileSync(path.join(outputDir, "evaluation.json"), "utf8")).metrics.largeModules,
+    0
   );
 });
 
@@ -119,5 +129,13 @@ test("discovers workspace source roots and resolves workspace package imports", 
   assert.ok(fs.existsSync(path.join(outputDir, "modules", "apps-web.md")));
   assert.ok(fs.existsSync(path.join(outputDir, "modules", "packages-ui.md")));
   assert.match(fs.readFileSync(path.join(outputDir, "llms.txt"), "utf8"), /modules\/apps-web\.md/);
+  assert.match(fs.readFileSync(path.join(outputDir, "modules", "apps-web.md"), "utf8"), /Depends on Modules/);
+  assert.match(fs.readFileSync(path.join(outputDir, "modules", "apps-web.md"), "utf8"), /packages\/ui/);
+  assert.match(fs.readFileSync(path.join(outputDir, "modules", "packages-ui.md"), "utf8"), /Used by Modules/);
+  assert.match(fs.readFileSync(path.join(outputDir, "modules", "packages-ui.md"), "utf8"), /apps\/web/);
   assert.ok(graph.nodes.some((node) => node.kind === "resource" && node.path === "apps/web/src/styles.module.css"));
+  assert.equal(
+    JSON.parse(fs.readFileSync(path.join(outputDir, "evaluation.json"), "utf8")).metrics.moduleDocsPresent,
+    3
+  );
 });
