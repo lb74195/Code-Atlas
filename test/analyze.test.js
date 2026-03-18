@@ -70,14 +70,30 @@ test("discovers workspace source roots and resolves workspace package imports", 
     advisories: []
   }, sourceReport, graph);
 
-  assert.equal(files.length, 4);
+  assert.equal(files.length, 5);
   assert.ok(sourceReport.files.some((file) => file.path === "apps/web/src/main.tsx"));
   assert.ok(sourceReport.files.some((file) => file.path === "packages/ui/Button.tsx"));
   assert.ok(sourceReport.files.some((file) => file.path === "packages/utils/index.ts"));
   assert.ok(sourceReport.files.some((file) => file.path === "apps/web/src/helpers/label.ts"));
+  assert.ok(sourceReport.files.some((file) => file.path === "apps/web/src/helpers/common.util.ts"));
   assert.ok(
     sourceReport.importEdges.some(
       (edge) => edge.from === "file:apps/web/src/main.tsx" && edge.to === "file:packages/ui/Button.tsx"
+    )
+  );
+  assert.ok(
+    sourceReport.importEdges.some(
+      (edge) => edge.from === "file:apps/web/src/main.tsx" && edge.to === "file:apps/web/src/styles.module.css"
+    )
+  );
+  assert.ok(
+    sourceReport.importEdges.some(
+      (edge) => edge.from === "file:apps/web/src/main.tsx" && edge.to === "file:apps/web/src/locales/en.json"
+    )
+  );
+  assert.ok(
+    sourceReport.importEdges.some(
+      (edge) => edge.from === "file:apps/web/src/main.tsx" && edge.to === "file:apps/web/src/assets/logo.svg"
     )
   );
   assert.ok(
@@ -91,6 +107,11 @@ test("discovers workspace source roots and resolves workspace package imports", 
     )
   );
   assert.ok(
+    sourceReport.callEdges.some(
+      (edge) => edge.from === "file:apps/web/src/main.tsx" && edge.to === "symbol:apps/web/src/helpers/common.util.ts:formatPseudoExt"
+    )
+  );
+  assert.ok(
     sourceReport.componentEdges.some(
       (edge) => edge.from === "file:apps/web/src/main.tsx" && edge.to === "symbol:packages/ui/Button.tsx:Button"
     )
@@ -98,4 +119,5 @@ test("discovers workspace source roots and resolves workspace package imports", 
   assert.ok(fs.existsSync(path.join(outputDir, "modules", "apps-web.md")));
   assert.ok(fs.existsSync(path.join(outputDir, "modules", "packages-ui.md")));
   assert.match(fs.readFileSync(path.join(outputDir, "llms.txt"), "utf8"), /modules\/apps-web\.md/);
+  assert.ok(graph.nodes.some((node) => node.kind === "resource" && node.path === "apps/web/src/styles.module.css"));
 });

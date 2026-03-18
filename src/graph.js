@@ -134,6 +134,20 @@ export function buildGraph(rootDir, config, dependencyReport, sourceReport) {
     }
   }
 
+  const sourceFileIds = new Set(sourceReport.files.map((file) => file.id));
+  for (const edge of sourceReport.importEdges) {
+    if (!edge.to.startsWith("file:") || sourceFileIds.has(edge.to)) {
+      continue;
+    }
+
+    nodes.push({
+      id: edge.to,
+      kind: "resource",
+      label: edge.to.replace(/^file:/, ""),
+      path: edge.to.replace(/^file:/, "")
+    });
+  }
+
   for (const route of sourceReport.routes) {
     nodes.push(route);
     edges.push({

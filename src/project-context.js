@@ -4,27 +4,32 @@ import path from "node:path";
 const PACKAGE_JSON = "package.json";
 const WORKSPACE_FILE = "pnpm-workspace.yaml";
 const SOURCE_FILE_EXTENSIONS = [".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".vue"];
+const RESOURCE_FILE_EXTENSIONS = [".css", ".scss", ".sass", ".less", ".svg", ".png", ".jpg", ".jpeg", ".gif", ".webp", ".json"];
 
 export function buildProjectContext(rootDir, files, config) {
   const fileSet = new Set(files.map((filePath) => toPosix(path.relative(rootDir, filePath))));
+  const resourceSet = discoverResourceFiles(rootDir, config);
   const workspacePackages = discoverWorkspacePackages(rootDir, config.exclude ?? []);
   const pathAliasConfigs = discoverPathAliasConfigs(rootDir, config.exclude ?? []);
 
   return {
     fileSet,
+    resourceSet,
     workspacePackages,
     pathAliasConfigs
   };
 }
 
 export function discoverSearchRoots(rootDir, config) {
-  const includeRoots = config.include
+  const include = Array.isArray(config?.include) ? config.include : ["src", "app", "pages", "components"];
+  const hasCustomInclude = Boolean(config?.hasCustomInclude);
+  const includeRoots = include
     .map((entry) => path.join(rootDir, entry))
     .filter((entry) => fs.existsSync(entry));
 
   const roots = new Set(includeRoots);
 
-  if (!config.hasCustomInclude) {
+  if (!hasCustomInclude) {
     for (const workspaceRoot of discoverWorkspaceRoots(rootDir)) {
       if (fs.existsSync(workspaceRoot)) {
         roots.add(workspaceRoot);
@@ -41,7 +46,7 @@ export function resolveImportSpecifier(fromFilePath, specifier, context) {
   }
 
   if (specifier.startsWith(".")) {
-    return resolveFileCandidate(path.posix.join(path.posix.dirname(fromFilePath), specifier), context.fileSet);
+    return resolveFileCandidate(path.posix.join(path.posix.dirname(fromFilePath), specifier), context.fileSet, context.resourceSet);
   }
 
   const aliasResolved = resolveAliasSpecifier(fromFilePath, specifier, context);
@@ -54,7 +59,7 @@ export function resolveImportSpecifier(fromFilePath, specifier, context) {
     return null;
   }
 
-  return resolveWorkspaceFile(workspaceHit.packageInfo, workspaceHit.subpath, context.fileSet);
+  return resolveWorkspaceFile(workspaceHit.packageInfo, workspaceHit.subpath, context.fileSet, context.resourceSet);
 }
 
 function discoverWorkspaceRoots(rootDir) {
@@ -94,6 +99,18 @@ function discoverWorkspacePackages(rootDir, exclude) {
   }
 
   return packages;
+}
+
+function discoverResourceFiles(rootDir, config) {
+  const resourceSet = new Set();
+  const searchRoots = discoverSearchRoots(rootDir, config);
+  const exclude = Array.isArray(config?.exclude) ? config.exclude : ["node_modules", "dist", "build", ".next", "coverage"];
+
+  for (const searchRoot of searchRoots) {
+    walkForResources(searchRoot, rootDir, exclude, resourceSet);
+  }
+
+  return resourceSet;
 }
 
 function discoverPathAliasConfigs(rootDir, exclude) {
@@ -148,7 +165,7 @@ function scanForTsconfig(currentDir, rootDir, exclude, configs) {
       continue;
     }
 
-    if (!/^tsconfig(\..+)?\.json$/.test(entry.name)) {
+    if (!/^(tsconfig(\..+)?|jsconfig)\.json$/.test(entry.name)) {
       continue;
     }
 
@@ -183,18 +200,18 @@ function resolveWorkspacePackageSpecifier(specifier, workspacePackages) {
   };
 }
 
-function resolveWorkspaceFile(packageInfo, subpath, fileSet) {
+function resolveWorkspaceFile(packageInfo, subpath, fileSet, resourceSet) {
   if (!packageInfo) {
     return null;
   }
 
   if (subpath) {
-    return resolveFileCandidate(path.posix.join(packageInfo.dirPath, subpath), fileSet);
+    return resolveFileCandidate(path.posix.join(packageInfo.dirPath, subpath), fileSet, resourceSet);
   }
 
   const entryCandidates = [packageInfo.module, packageInfo.main, packageInfo.types, "index", "src/index"].filter(Boolean);
   for (const candidate of entryCandidates) {
-    const resolved = resolveFileCandidate(path.posix.join(packageInfo.dirPath, toPosix(candidate)), fileSet);
+    const resolved = resolveFileCandidate(path.posix.join(packageInfo.dirPath, toPosix(candidate)), fileSet, resourceSet);
     if (resolved) {
       return resolved;
     }
@@ -209,7 +226,7 @@ function resolveAliasSpecifier(fromFilePath, specifier, context) {
   });
 
   for (const config of applicableConfigs) {
-    const resolved = resolveAliasWithConfig(specifier, config, context.fileSet);
+    const resolved = resolveAliasWithConfig(specifier, config, context.fileSet, context.resourceSet);
     if (resolved) {
       return resolved;
     }
@@ -218,7 +235,7 @@ function resolveAliasSpecifier(fromFilePath, specifier, context) {
   return null;
 }
 
-function resolveAliasWithConfig(specifier, config, fileSet) {
+function resolveAliasWithConfig(specifier, config, fileSet, resourceSet) {
   const mappings = Object.entries(config.paths)
     .map(([pattern, targets]) => ({
       pattern,
@@ -236,7 +253,7 @@ function resolveAliasWithConfig(specifier, config, fileSet) {
     for (const target of mapping.targets) {
       const substituted = substituteWildcard(target, wildcardValue);
       const basePath = path.posix.join(config.dirPath || "", normalizePath(config.baseUrl), substituted);
-      const resolved = resolveFileCandidate(basePath, fileSet);
+      const resolved = resolveFileCandidate(basePath, fileSet, resourceSet);
       if (resolved) {
         return resolved;
       }
@@ -246,12 +263,16 @@ function resolveAliasWithConfig(specifier, config, fileSet) {
   return null;
 }
 
-function resolveFileCandidate(basePath, fileSet) {
+function resolveFileCandidate(basePath, fileSet, resourceSet = fileSet) {
   const normalizedBase = normalizePath(basePath);
   const candidates = [normalizedBase];
 
-  if (!path.posix.extname(normalizedBase)) {
-    for (const extension of SOURCE_FILE_EXTENSIONS) {
+  const extension = path.posix.extname(normalizedBase);
+  const candidateExtensions = [...SOURCE_FILE_EXTENSIONS, ...RESOURCE_FILE_EXTENSIONS];
+  const shouldTrySourceExtensions = !extension || !candidateExtensions.includes(extension);
+
+  if (shouldTrySourceExtensions) {
+    for (const extension of candidateExtensions) {
       candidates.push(`${normalizedBase}${extension}`);
       candidates.push(path.posix.join(normalizedBase, `index${extension}`));
     }
@@ -261,9 +282,37 @@ function resolveFileCandidate(basePath, fileSet) {
     if (fileSet.has(candidate)) {
       return candidate;
     }
+    if (resourceSet.has(candidate)) {
+      return candidate;
+    }
   }
 
   return null;
+}
+
+function walkForResources(currentDir, rootDir, exclude, resourceSet) {
+  const relativeDir = path.relative(rootDir, currentDir);
+  if (shouldExclude(relativeDir, exclude)) {
+    return;
+  }
+
+  for (const entry of fs.readdirSync(currentDir, { withFileTypes: true })) {
+    const absolutePath = path.join(currentDir, entry.name);
+    const relativePath = toPosix(path.relative(rootDir, absolutePath));
+
+    if (shouldExclude(relativePath, exclude)) {
+      continue;
+    }
+
+    if (entry.isDirectory()) {
+      walkForResources(absolutePath, rootDir, exclude, resourceSet);
+      continue;
+    }
+
+    if (RESOURCE_FILE_EXTENSIONS.includes(path.extname(entry.name))) {
+      resourceSet.add(relativePath);
+    }
+  }
 }
 
 function matchAliasPattern(specifier, pattern) {

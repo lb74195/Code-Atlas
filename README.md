@@ -26,6 +26,7 @@ The first version focuses on React and Next.js shaped repositories without exter
 - auto-discovers frontend monorepo roots such as `apps/` and `packages/`
 - extracts files, symbols, imports, calls, JSX component usage, and route hints
 - resolves relative imports, workspace package imports, and `tsconfig` path aliases when possible
+- resolves local frontend resources such as stylesheets, JSON files, and SVG assets
 - maps package and runtime dependencies
 - evaluates upgrade advisories against configured target versions
 - highlights files and inferred symbols that appear to use affected APIs or patterns during upgrades

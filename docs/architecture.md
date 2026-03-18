@@ -26,6 +26,7 @@ Core node kinds:
 - `dependency`
 - `directory`
 - `file`
+- `resource`
 - `route`
 - `symbol`
 - `advisory`
