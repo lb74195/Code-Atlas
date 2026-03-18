@@ -9,7 +9,6 @@
   },
   "scripts": {
     "analyze": "node ./src/cli.js analyze .",
-    "new-task": "node ./scripts/init-task.js",
     "smoke": "node ./src/cli.js analyze ./test/fixtures/sample-app --output ai-output",
     "test": "node --test",
     "lint": "node ./src/cli.js validate-config"
