@@ -36,6 +36,10 @@
         "Older form action hooks",
         "Libraries that depend on React internals"
       ],
+      "suggestedActions": [
+        "Upgrade `react` and `react-dom` together and align type packages in the same PR.",
+        "Run React 19 codemods before hand-editing legacy entrypoints or refs."
+      ],
       "references": [
         {
           "label": "React 19 Upgrade Guide",
@@ -60,6 +64,28 @@
         "hydrate",
         "hydrateRoot",
         "createRoot"
+      ],
+      "patternGuidance": [
+        {
+          "pattern": "render",
+          "migration": "Replace `ReactDOM.render(...)` with `createRoot(container).render(...)`."
+        },
+        {
+          "pattern": "hydrate",
+          "migration": "Replace `ReactDOM.hydrate(...)` with `hydrateRoot(container, ...)`."
+        },
+        {
+          "pattern": "hydrateRoot",
+          "migration": "Review hydration bootstrap code to ensure it uses the React 19 entrypoint shape and root options correctly."
+        },
+        {
+          "pattern": "createRoot",
+          "migration": "Verify bootstrap code imports `createRoot` from `react-dom/client` and that only one root is created per container."
+        }
+      ],
+      "suggestedActions": [
+        "Search app bootstrap and hydration entry files first.",
+        "Validate SSR hydration flows after replacing legacy entry APIs."
       ],
       "references": [
         {
@@ -89,6 +115,36 @@
         "searchParams",
         "useFormState"
       ],
+      "patternGuidance": [
+        {
+          "pattern": "cookies(",
+          "migration": "In server code, change `const store = cookies()` to `const store = await cookies()` and make the surrounding function async."
+        },
+        {
+          "pattern": "headers(",
+          "migration": "In server code, change `const headerList = headers()` to `const headerList = await headers()` and make the surrounding function async."
+        },
+        {
+          "pattern": "draftMode(",
+          "migration": "Change `draftMode()` access to `await draftMode()` and update the caller to async."
+        },
+        {
+          "pattern": "params",
+          "migration": "For `page`, `layout`, route handlers, and metadata APIs, migrate synchronous `params` access to the async request API shape or generated helper types."
+        },
+        {
+          "pattern": "searchParams",
+          "migration": "For `page` and related entrypoints, migrate synchronous `searchParams` access to the async request API shape."
+        },
+        {
+          "pattern": "useFormState",
+          "migration": "Prefer `useActionState` during the Next 15 + React 19 migration instead of adding new `useFormState` usage."
+        }
+      ],
+      "suggestedActions": [
+        "Run the `@next/codemod` upgrade flow before manual cleanup.",
+        "Search for `@next-codemod-error` markers after codemods to find unresolved callsites."
+      ],
       "references": [
         {
           "label": "Next.js 15 Upgrade Guide",
@@ -111,6 +167,20 @@
       "affectedPatterns": [
         "engines.node",
         "build.target"
+      ],
+      "patternGuidance": [
+        {
+          "pattern": "engines.node",
+          "migration": "Update `engines.node` and CI/runtime images so they satisfy Vite 7's Node 20.19+ or 22.12+ requirement."
+        },
+        {
+          "pattern": "build.target",
+          "migration": "Recheck `build.target` against your browser support matrix because newer defaults may shift output expectations."
+        }
+      ],
+      "suggestedActions": [
+        "Upgrade Node before or with Vite 7.",
+        "Re-run production build checks after adjusting browser targets."
       ],
       "references": [
         {

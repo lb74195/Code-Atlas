@@ -7,6 +7,10 @@ export function attachAdvisoryOccurrences(rootDir, files, advisories, sourceRepo
   return advisories.map((advisory) => ({
     ...advisory,
     occurrences: findOccurrences(rootDir, files, advisory.affectedPatterns ?? [], fileReports)
+      .map((occurrence) => ({
+        ...occurrence,
+        migration: findMigrationGuidance(advisory, occurrence.pattern)
+      }))
   }));
 }
 
@@ -82,4 +86,8 @@ function findOwningSymbol(fileReport, line) {
 
 function toPosix(input) {
   return input.split(path.sep).join("/");
+}
+
+function findMigrationGuidance(advisory, pattern) {
+  return advisory.patternGuidance?.find((entry) => entry.pattern === pattern)?.migration ?? null;
 }

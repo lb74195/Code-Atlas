@@ -49,6 +49,10 @@ test("analyzes a sample frontend app and emits docs", () => {
     fs.readFileSync(path.join(outputDir, "playbooks", "upgrades", "next.md"), "utf8"),
     /HomePage/
   );
+  assert.match(
+    fs.readFileSync(path.join(outputDir, "playbooks", "upgrades", "next.md"), "utf8"),
+    /await cookies\(\)/
+  );
   assert.equal(
     JSON.parse(fs.readFileSync(path.join(outputDir, "evaluation.json"), "utf8")).grade,
     "A"

@@ -68,7 +68,9 @@ function collectPackageAdvisories(packageName, currentMajor, targetMajor, rules)
       title: rule.title,
       summary: rule.summary,
       notes: rule.notes ?? [],
+      suggestedActions: rule.suggestedActions ?? [],
       affectedPatterns: rule.affectedPatterns ?? [],
+      patternGuidance: rule.patternGuidance ?? [],
       references: rule.references ?? []
     }));
 }

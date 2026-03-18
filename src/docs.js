@@ -125,10 +125,16 @@ function buildDependencies(dependencyReport) {
     const patterns = advisory.affectedPatterns.length > 0
       ? ` Affected patterns: ${advisory.affectedPatterns.map((pattern) => `\`${pattern}\``).join(", ")}.`
       : "";
+    const suggestedActions = advisory.suggestedActions?.length
+      ? `\nSuggested actions:\n${advisory.suggestedActions.map((action) => `- ${action}`).join("\n")}`
+      : "";
     const occurrences = advisory.occurrences?.length
       ? advisory.occurrences
           .slice(0, 12)
-          .map((occurrence) => `- Matched \`${occurrence.pattern}\` in ${formatOccurrenceLocation(occurrence)} (${occurrence.confidence})`)
+          .map((occurrence) => {
+            const migration = occurrence.migration ? ` -> ${occurrence.migration}` : "";
+            return `- Matched \`${occurrence.pattern}\` in ${formatOccurrenceLocation(occurrence)} (${occurrence.confidence})${migration}`;
+          })
           .join("\n")
       : "- No matching source pattern found in scanned files.";
 
@@ -141,6 +147,7 @@ function buildDependencies(dependencyReport) {
 ${advisory.notes.map((note) => `- ${note}`).join("\n")}
 - References: ${references || "none"}
 ${patterns}
+${suggestedActions}
 ${occurrences}
 `;
   });
@@ -237,13 +244,21 @@ function buildRefactorPlaybook() {
 }
 
 function buildUpgradePlaybook(advisory) {
+  const migrationTasks = [...new Map(
+    (advisory.occurrences ?? [])
+      .filter((occurrence) => occurrence.migration)
+      .map((occurrence) => [occurrence.pattern, occurrence.migration])
+  ).entries()];
   const impactedSymbols = advisory.occurrences
     ?.filter((occurrence) => occurrence.symbolName)
     .map((occurrence) => `- \`${occurrence.symbolName}\` (${occurrence.symbolKind}) in \`${occurrence.filePath}\``);
   const occurrenceLines = advisory.occurrences?.length
     ? advisory.occurrences
         .slice(0, 20)
-        .map((occurrence) => `- ${formatOccurrenceLocation(occurrence)} matched \`${occurrence.pattern}\` (${occurrence.confidence})`)
+        .map((occurrence) => {
+          const migration = occurrence.migration ? ` -> ${occurrence.migration}` : "";
+          return `- ${formatOccurrenceLocation(occurrence)} matched \`${occurrence.pattern}\` (${occurrence.confidence})${migration}`;
+        })
         .join("\n")
     : "- No source matches were found in scanned files.";
 
@@ -261,11 +276,23 @@ function buildUpgradePlaybook(advisory) {
 
 ${advisory.notes.map((note) => `- ${note}`).join("\n")}
 
+## Suggested Actions
+
+${advisory.suggestedActions?.length
+    ? advisory.suggestedActions.map((action) => `- ${action}`).join("\n")
+    : "- no general actions recorded"}
+
 ## Impacted Patterns
 
 ${advisory.affectedPatterns.length > 0
     ? advisory.affectedPatterns.map((pattern) => `- \`${pattern}\``).join("\n")
     : "- none recorded"}
+
+## Migration Tasks From Current Matches
+
+${migrationTasks.length > 0
+    ? migrationTasks.map(([pattern, migration]) => `- \`${pattern}\`: ${migration}`).join("\n")
+    : "- No pattern-specific migrations were inferred from the current matches."}
 
 ## Impacted Symbols
 
