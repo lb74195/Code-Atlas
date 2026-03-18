@@ -114,7 +114,7 @@ function buildDependencies(dependencyReport) {
     const occurrences = advisory.occurrences?.length
       ? advisory.occurrences
           .slice(0, 12)
-          .map((occurrence) => `- Matched \`${occurrence.pattern}\` in \`${occurrence.filePath}:${occurrence.line}\` (${occurrence.confidence})`)
+          .map((occurrence) => `- Matched \`${occurrence.pattern}\` in ${formatOccurrenceLocation(occurrence)} (${occurrence.confidence})`)
           .join("\n")
       : "- No matching source pattern found in scanned files.";
 
@@ -183,10 +183,13 @@ function buildRefactorPlaybook() {
 }
 
 function buildUpgradePlaybook(advisory) {
+  const impactedSymbols = advisory.occurrences
+    ?.filter((occurrence) => occurrence.symbolName)
+    .map((occurrence) => `- \`${occurrence.symbolName}\` (${occurrence.symbolKind}) in \`${occurrence.filePath}\``);
   const occurrenceLines = advisory.occurrences?.length
     ? advisory.occurrences
         .slice(0, 20)
-        .map((occurrence) => `- \`${occurrence.filePath}:${occurrence.line}\` matched \`${occurrence.pattern}\` (${occurrence.confidence})`)
+        .map((occurrence) => `- ${formatOccurrenceLocation(occurrence)} matched \`${occurrence.pattern}\` (${occurrence.confidence})`)
         .join("\n")
     : "- No source matches were found in scanned files.";
 
@@ -209,6 +212,10 @@ ${advisory.notes.map((note) => `- ${note}`).join("\n")}
 ${advisory.affectedPatterns.length > 0
     ? advisory.affectedPatterns.map((pattern) => `- \`${pattern}\``).join("\n")
     : "- none recorded"}
+
+## Impacted Symbols
+
+${impactedSymbols?.length ? [...new Set(impactedSymbols)].join("\n") : "- No owning export or component was inferred for the current matches."}
 
 ## Source Matches
 
@@ -245,4 +252,13 @@ function renderList(items, fallback = "- none") {
 
 function sanitizeModuleName(name) {
   return name.replace(/[^a-z0-9_-]+/gi, "-").toLowerCase();
+}
+
+function formatOccurrenceLocation(occurrence) {
+  const base = `\`${occurrence.filePath}:${occurrence.line}\``;
+  if (!occurrence.symbolName) {
+    return base;
+  }
+
+  return `${base} in \`${occurrence.symbolName}\` (${occurrence.symbolKind})`;
 }

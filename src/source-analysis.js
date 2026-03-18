@@ -98,39 +98,56 @@ function extractImports(relativePath, content) {
 }
 
 function extractSymbols(relativePath, content) {
-  const symbols = [];
+  const rawSymbols = [];
+  const lineStarts = buildLineStarts(content);
 
   const functionRegex = /export\s+(?:default\s+)?function\s+([A-Za-z0-9_]+)/g;
   for (const match of content.matchAll(functionRegex)) {
-    symbols.push(createSymbol(relativePath, match[1], "function", content));
+    rawSymbols.push(createRawSymbol(match.index, match[1], "function"));
   }
 
   const variableRegex = /export\s+(?:const|let|var)\s+([A-Za-z0-9_]+)/g;
   for (const match of content.matchAll(variableRegex)) {
-    symbols.push(createSymbol(relativePath, match[1], inferVariableKind(match[1]), content));
+    rawSymbols.push(createRawSymbol(match.index, match[1], inferVariableKind(match[1])));
   }
 
   const typeRegex = /export\s+(?:type|interface)\s+([A-Za-z0-9_]+)/g;
   for (const match of content.matchAll(typeRegex)) {
-    symbols.push({
-      id: `symbol:${relativePath}:${match[1]}`,
-      name: match[1],
-      path: relativePath,
-      kind: "type",
-      confidence: "high"
-    });
+    rawSymbols.push(createRawSymbol(match.index, match[1], "type"));
   }
+
+  const sortedSymbols = rawSymbols.sort((a, b) => a.startIndex - b.startIndex);
+
+  const symbols = sortedSymbols.map((symbol, index) => {
+    const endIndex = index < sortedSymbols.length - 1
+      ? Math.max(symbol.startIndex, sortedSymbols[index + 1].startIndex - 1)
+      : Math.max(symbol.startIndex, content.length - 1);
+
+    return createSymbol(relativePath, symbol.name, symbol.fallbackKind, content, symbol.startIndex, endIndex, lineStarts);
+  });
 
   return dedupeById(symbols);
 }
 
-function createSymbol(relativePath, name, fallbackKind, content) {
+function createRawSymbol(startIndex, name, fallbackKind) {
+  return {
+    startIndex,
+    name,
+    fallbackKind
+  };
+}
+
+function createSymbol(relativePath, name, fallbackKind, content, startIndex, endIndex, lineStarts) {
+  const kind = fallbackKind === "type" ? "type" : inferNamedSymbolKind(name, fallbackKind, content);
+
   return {
     id: `symbol:${relativePath}:${name}`,
     name,
     path: relativePath,
-    kind: inferNamedSymbolKind(name, fallbackKind, content),
-    confidence: "heuristic"
+    kind,
+    confidence: kind === "type" ? "high" : "heuristic",
+    lineStart: indexToLine(startIndex, lineStarts),
+    lineEnd: indexToLine(endIndex, lineStarts)
   };
 }
 
@@ -273,6 +290,36 @@ function extractImportedNames(rawImportClause) {
 function dedupeById(items) {
   const byId = new Map(items.map((item) => [item.id, item]));
   return [...byId.values()];
+}
+
+function buildLineStarts(content) {
+  const starts = [0];
+
+  for (let i = 0; i < content.length; i += 1) {
+    if (content[i] === "\n") {
+      starts.push(i + 1);
+    }
+  }
+
+  return starts;
+}
+
+function indexToLine(index, lineStarts) {
+  let low = 0;
+  let high = lineStarts.length - 1;
+  let result = 0;
+
+  while (low <= high) {
+    const mid = Math.floor((low + high) / 2);
+    if (lineStarts[mid] <= index) {
+      result = mid;
+      low = mid + 1;
+    } else {
+      high = mid - 1;
+    }
+  }
+
+  return result + 1;
 }
 
 function toPosix(input) {

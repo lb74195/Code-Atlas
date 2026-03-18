@@ -20,7 +20,7 @@ test("analyzes a sample frontend app and emits docs", () => {
   const files = listSourceFiles(fixtureDir, config);
   const dependencyReport = analyzeDependencies(fixtureDir, config, rules);
   const sourceReport = analyzeSources(fixtureDir, files);
-  dependencyReport.advisories = attachAdvisoryOccurrences(fixtureDir, files, dependencyReport.advisories);
+  dependencyReport.advisories = attachAdvisoryOccurrences(fixtureDir, files, dependencyReport.advisories, sourceReport);
   const graph = buildGraph(fixtureDir, config, dependencyReport, sourceReport);
   const outputDir = fs.mkdtempSync(path.join(os.tmpdir(), "fcg-test-"));
 
@@ -30,17 +30,20 @@ test("analyzes a sample frontend app and emits docs", () => {
   assert.ok(dependencyReport.advisories.some((advisory) => advisory.packageName === "next"));
   assert.ok(
     dependencyReport.advisories.some(
-      (advisory) => advisory.packageName === "next" && advisory.occurrences.some((hit) => hit.filePath === "app/page.tsx")
+      (advisory) =>
+        advisory.packageName === "next" &&
+        advisory.occurrences.some((hit) => hit.filePath === "app/page.tsx" && hit.symbolName === "HomePage")
     )
   );
   assert.ok(sourceReport.routes.some((route) => route.routeType === "next-app-page"));
   assert.ok(graph.nodes.some((node) => node.kind === "advisory"));
+  assert.ok(graph.edges.some((edge) => edge.kind === "AFFECTS_SYMBOL" && edge.to === "symbol:app/page.tsx:HomePage"));
   assert.ok(fs.existsSync(path.join(outputDir, "llms.txt")));
   assert.ok(fs.existsSync(path.join(outputDir, "overview.md")));
   assert.ok(fs.existsSync(path.join(outputDir, "dependencies.md")));
   assert.ok(fs.existsSync(path.join(outputDir, "playbooks", "upgrades", "next.md")));
   assert.match(
     fs.readFileSync(path.join(outputDir, "playbooks", "upgrades", "next.md"), "utf8"),
-    /app\/page\.tsx:6/
+    /HomePage/
   );
 });

@@ -75,6 +75,16 @@ export function buildGraph(rootDir, config, dependencyReport, sourceReport) {
         pattern: occurrence.pattern,
         line: occurrence.line
       });
+
+      if (occurrence.symbolId) {
+        edges.push({
+          from: advisoryId,
+          to: occurrence.symbolId,
+          kind: "AFFECTS_SYMBOL",
+          pattern: occurrence.pattern,
+          line: occurrence.line
+        });
+      }
     }
   }
 
@@ -112,7 +122,9 @@ export function buildGraph(rootDir, config, dependencyReport, sourceReport) {
         label: symbol.name,
         symbolKind: symbol.kind,
         path: symbol.path,
-        confidence: symbol.confidence
+        confidence: symbol.confidence,
+        lineStart: symbol.lineStart,
+        lineEnd: symbol.lineEnd
       });
       edges.push({
         from: file.id,

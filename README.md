@@ -26,7 +26,7 @@ The first version focuses on React and Next.js shaped repositories without exter
 - extracts files, symbols, imports, calls, JSX component usage, and route hints
 - maps package and runtime dependencies
 - evaluates upgrade advisories against configured target versions
-- highlights files that appear to use affected APIs or patterns during upgrades
+- highlights files and inferred symbols that appear to use affected APIs or patterns during upgrades
 - writes progressive disclosure docs into `ai/`
 
 ## Usage

@@ -40,6 +40,8 @@ Core edge kinds:
 - `DEPENDS_ON`
 - `TARGETS_VERSION`
 - `TRIGGERS_ADVISORY`
+- `AFFECTS_FILE`
+- `AFFECTS_SYMBOL`
 
 ## Constraints
 
