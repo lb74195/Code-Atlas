@@ -14,6 +14,7 @@ import { attachAdvisoryOccurrences } from "../src/upgrade-impact.js";
 
 const fixtureDir = path.resolve("test/fixtures/sample-app");
 const workspaceFixtureDir = path.resolve("test/fixtures/sample-workspace");
+const routerFixtureDir = path.resolve("test/fixtures/sample-router-app");
 const rules = JSON.parse(fs.readFileSync(path.resolve("data/upgrade-advisories.json"), "utf8"));
 
 test("analyzes a sample frontend app and emits docs", () => {
@@ -36,7 +37,7 @@ test("analyzes a sample frontend app and emits docs", () => {
         advisory.occurrences.some((hit) => hit.filePath === "app/page.tsx" && hit.symbolName === "HomePage")
     )
   );
-  assert.ok(sourceReport.routes.some((route) => route.routeType === "next-app-page"));
+  assert.ok(sourceReport.routes.some((route) => route.routeType === "next-app-page" && route.path === "/"));
   assert.ok(graph.nodes.some((node) => node.kind === "advisory"));
   assert.ok(graph.edges.some((edge) => edge.kind === "AFFECTS_SYMBOL" && edge.to === "symbol:app/page.tsx:HomePage"));
   assert.ok(fs.existsSync(path.join(outputDir, "llms.txt")));
@@ -60,6 +61,32 @@ test("analyzes a sample frontend app and emits docs", () => {
   assert.equal(
     JSON.parse(fs.readFileSync(path.join(outputDir, "evaluation.json"), "utf8")).metrics.largeModules,
     0
+  );
+});
+
+test("extracts react-router route hints from router files", () => {
+  const config = loadConfig(routerFixtureDir, null);
+  const files = listSourceFiles(routerFixtureDir, config);
+  const sourceReport = analyzeSources(routerFixtureDir, files, config);
+  const graph = buildGraph(routerFixtureDir, config, {
+    packageJsonPath: path.join(routerFixtureDir, "package.json"),
+    packageManager: null,
+    runtime: null,
+    dependencies: [],
+    advisories: []
+  }, sourceReport);
+
+  assert.equal(files.length, 3);
+  assert.deepEqual(
+    sourceReport.routes.map((route) => route.path).sort(),
+    ["/", "/account", "/settings"]
+  );
+  assert.ok(sourceReport.routes.every((route) => route.routeType === "react-router"));
+  assert.ok(sourceReport.routes.every((route) => route.sourcePath === "src/router.tsx"));
+  assert.ok(
+    graph.edges.some(
+      (edge) => edge.kind === "IMPLEMENTS_ROUTE" && edge.from === "file:src/router.tsx" && edge.to === "route:src/router.tsx:/settings"
+    )
   );
 });
 

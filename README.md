@@ -25,6 +25,7 @@ The first version focuses on React and Next.js shaped repositories without exter
 - scans frontend source files
 - auto-discovers frontend monorepo roots such as `apps/` and `packages/`
 - extracts files, symbols, imports, calls, JSX component usage, and route hints
+- detects Next.js and React Router style route entrypoints
 - resolves relative imports, workspace package imports, and `tsconfig` path aliases when possible
 - resolves local frontend resources such as stylesheets, JSON files, and SVG assets
 - maps package and runtime dependencies

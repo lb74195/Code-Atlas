@@ -1,0 +1,7 @@
+{
+  "name": "sample-router-app",
+  "private": true,
+  "dependencies": {
+    "react-router-dom": "^7.0.0"
+  }
+}

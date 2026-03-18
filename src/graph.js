@@ -151,7 +151,7 @@ export function buildGraph(rootDir, config, dependencyReport, sourceReport) {
   for (const route of sourceReport.routes) {
     nodes.push(route);
     edges.push({
-      from: `file:${route.path}`,
+      from: `file:${route.sourcePath}`,
       to: route.id,
       kind: "IMPLEMENTS_ROUTE"
     });

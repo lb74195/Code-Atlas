@@ -22,9 +22,7 @@ export function analyzeSources(rootDir, files, config = {}) {
       symbolIndex.set(symbol.id, symbol);
     }
 
-    if (report.route) {
-      routeNodes.push(report.route);
-    }
+    routeNodes.push(...report.routes);
   }
 
   const linkedReports = resolveInternalLinks(fileReports, projectContext);
@@ -48,7 +46,7 @@ function analyzeFile(relativePath, content) {
   const symbols = extractSymbols(relativePath, content);
   const calls = extractCalls(relativePath, content, imports, symbols);
   const componentUses = extractComponentUses(relativePath, content, imports, symbols);
-  const route = inferRoute(relativePath);
+  const routes = inferRoutes(relativePath, content);
 
   return {
     id: `file:${relativePath}`,
@@ -58,7 +56,7 @@ function analyzeFile(relativePath, content) {
     symbols,
     calls,
     componentUses,
-    route
+    routes
   };
 }
 
@@ -256,26 +254,69 @@ function extractComponentUses(relativePath, content, imports, symbols) {
   return componentUses;
 }
 
-function inferRoute(relativePath) {
+function inferRoutes(relativePath, content) {
+  const frameworkRoutes = [
+    ...inferNextRoutes(relativePath),
+    ...inferReactRouterRoutes(relativePath, content)
+  ];
+
+  return dedupeById(frameworkRoutes);
+}
+
+function inferNextRoutes(relativePath) {
   if (/^app\/(?:.*\/)?page\.(jsx?|tsx?)$/.test(relativePath)) {
-    return {
+    return [{
       id: `route:${relativePath}`,
       kind: "route",
-      path: relativePath,
+      path: toNextAppRoute(relativePath),
+      sourcePath: relativePath,
       routeType: "next-app-page"
-    };
+    }];
   }
 
   if (/^pages\/(?:.*\/)?[^/]+\.(jsx?|tsx?)$/.test(relativePath) && !relativePath.includes("/api/")) {
-    return {
+    return [{
       id: `route:${relativePath}`,
       kind: "route",
-      path: relativePath,
+      path: toNextPagesRoute(relativePath),
+      sourcePath: relativePath,
       routeType: "next-pages-route"
-    };
+    }];
   }
 
-  return null;
+  return [];
+}
+
+function inferReactRouterRoutes(relativePath, content) {
+  const looksLikeRouterFile = /react-router-dom/.test(content)
+    || /createBrowserRouter|createHashRouter|createMemoryRouter|createRoutesFromElements/.test(content)
+    || /<Routes\b|<Route\b/.test(content);
+
+  if (!looksLikeRouterFile) {
+    return [];
+  }
+
+  const routePaths = new Set();
+  const objectPathRegex = /\bpath\s*:\s*["'`]([^"'`]+)["'`]/g;
+  const jsxPathRegex = /<Route\b[^>]*\bpath=["'`]([^"'`]+)["'`][^>]*>/g;
+
+  for (const match of content.matchAll(objectPathRegex)) {
+    routePaths.add(match[1]);
+  }
+
+  for (const match of content.matchAll(jsxPathRegex)) {
+    routePaths.add(match[1]);
+  }
+
+  return [...routePaths]
+    .filter(Boolean)
+    .map((routePath) => ({
+      id: `route:${relativePath}:${routePath}`,
+      kind: "route",
+      path: routePath,
+      sourcePath: relativePath,
+      routeType: "react-router"
+    }));
 }
 
 function registerDirectory(directories, relativePath) {
@@ -497,4 +538,31 @@ function indexToLine(index, lineStarts) {
 
 function toPosix(input) {
   return input.split(path.sep).join("/");
+}
+
+function toNextAppRoute(relativePath) {
+  const stripped = relativePath
+    .replace(/^app\//, "")
+    .replace(/\/page\.(jsx?|tsx?)$/, "")
+    .replace(/^page\.(jsx?|tsx?)$/, "");
+
+  return normalizeRoutePath(stripped);
+}
+
+function toNextPagesRoute(relativePath) {
+  const stripped = relativePath
+    .replace(/^pages\//, "")
+    .replace(/\.(jsx?|tsx?)$/, "")
+    .replace(/\/index$/, "")
+    .replace(/^index$/, "");
+
+  return normalizeRoutePath(stripped);
+}
+
+function normalizeRoutePath(input) {
+  if (!input) {
+    return "/";
+  }
+
+  return `/${input}`.replace(/\/+/g, "/");
 }
